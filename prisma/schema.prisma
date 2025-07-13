@@ -1,0 +1,204 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  username  String   @unique
+  password  String
+  firstName String?
+  lastName  String?
+  avatar    String?
+  role      UserRole @default(USER)
+  status    UserStatus @default(ACTIVE)
+  
+  // Subscription info
+  subscription   Subscription?
+  subscriptionId String?
+  
+  // Chat related
+  chatRooms    ChatRoomMember[]
+  messages     Message[]
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  lastLoginAt DateTime?
+  
+  // Usage tracking
+  messageCount Int @default(0)
+  lastResetAt  DateTime @default(now())
+  
+  @@map("users")
+}
+
+model Subscription {
+  id             String           @id @default(cuid())
+  userId         String           @unique
+  user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan           SubscriptionPlan @default(FREE)
+  status         SubscriptionStatus @default(ACTIVE)
+  stripeCustomerId String?
+  stripeSubscriptionId String?
+  
+  // Limits
+  monthlyMessageLimit Int @default(50)
+  messagesUsed       Int @default(0)
+  
+  // Billing
+  currentPeriodStart DateTime?
+  currentPeriodEnd   DateTime?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("subscriptions")
+}
+
+model ChatRoom {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  type        ChatRoomType @default(PRIVATE)
+  isActive    Boolean  @default(true)
+  
+  // Members and messages
+  members  ChatRoomMember[]
+  messages Message[]
+  
+  // Room settings
+  maxMembers    Int @default(10)
+  allowAI       Boolean @default(true)
+  aiModel       String @default("gemini-pro")
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("chat_rooms")
+}
+
+model ChatRoomMember {
+  id         String @id @default(cuid())
+  userId     String
+  chatRoomId String
+  role       ChatRoomRole @default(MEMBER)
+  joinedAt   DateTime @default(now())
+  
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  chatRoom ChatRoom @relation(fields: [chatRoomId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, chatRoomId])
+  @@map("chat_room_members")
+}
+
+model Message {
+  id         String      @id @default(cuid())
+  content    String
+  type       MessageType @default(TEXT)
+  sender     MessageSender @default(USER)
+  
+  // Relations
+  userId     String?
+  chatRoomId String
+  user       User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  chatRoom   ChatRoom  @relation(fields: [chatRoomId], references: [id], onDelete: Cascade)
+  
+  // AI specific fields
+  aiModel    String?
+  promptTokens Int?
+  completionTokens Int?
+  
+  // Message metadata
+  isEdited   Boolean @default(false)
+  editedAt   DateTime?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("messages")
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  
+  @@map("refresh_tokens")
+}
+
+model ApiUsage {
+  id        String   @id @default(cuid())
+  userId    String
+  endpoint  String
+  method    String
+  statusCode Int
+  responseTime Int
+  timestamp DateTime @default(now())
+  
+  @@map("api_usage")
+}
+
+// Enums
+enum UserRole {
+  USER
+  ADMIN
+  MODERATOR
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  PENDING_VERIFICATION
+}
+
+enum SubscriptionPlan {
+  FREE
+  BASIC
+  PREMIUM
+  ENTERPRISE
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  INACTIVE
+  CANCELLED
+  PAST_DUE
+}
+
+enum ChatRoomType {
+  PRIVATE
+  PUBLIC
+  GROUP
+}
+
+enum ChatRoomRole {
+  OWNER
+  ADMIN
+  MODERATOR
+  MEMBER
+}
+
+enum MessageType {
+  TEXT
+  IMAGE
+  FILE
+  SYSTEM
+}
+
+enum MessageSender {
+  USER
+  AI
+  SYSTEM
+}

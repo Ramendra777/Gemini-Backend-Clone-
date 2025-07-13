@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gemini Backend Clone - API Preview</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .api-section {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .api-section:hover {
+            transform: translateY(-5px);
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            color: #4a5568;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .endpoint {
+            background: #f7fafc;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .method {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.8rem;
+            margin-right: 10px;
+        }
+
+        .method.get { background: #48bb78; color: white; }
+        .method.post { background: #4299e1; color: white; }
+        .method.put { background: #ed8936; color: white; }
+        .method.delete { background: #f56565; color: white; }
+
+        .endpoint-path {
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-weight: bold;
+            color: #2d3748;
+        }
+
+        .endpoint-desc {
+            margin-top: 8px;
+            color: #718096;
+            font-size: 0.9rem;
+        }
+
+        .demo-section {
+            background: #1a202c;
+            color: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .demo-title {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: #63b3ed;
+        }
+
+        .demo-form {
+            display: grid;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            margin-bottom: 5px;
+            color: #a0aec0;
+            font-weight: 500;
+        }
+
+        .form-group input, .form-group textarea {
+            padding: 12px;
+            border: 1px solid #4a5568;
+            border-radius: 6px;
+            background: #2d3748;
+            color: white;
+            font-size: 14px;
+        }
+
+        .form-group input:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #63b3ed;
+            box-shadow: 0 0 0 3px rgba(99, 179, 237, 0.1);
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .btn-primary {
+            background: #4299e1;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #3182ce;
+            transform: translateY(-2px);
+        }
+
+        .response-area {
+            background: #2d3748;
+            border: 1px solid #4a5568;
+            border-radius: 6px;
+            padding: 15px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 15px;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .status-running { background: #48bb78; }
+        .status-stopped { background: #f56565; }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .feature-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .feature-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .tech-stack {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .tech-badge {
+            background: #667eea;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .api-section {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 Gemini Backend Clone</h1>
+            <p>Production-Ready AI Chat API with Authentication & Subscriptions</p>
+            <div style="margin-top: 20px;">
+                <span class="status-indicator status-running"></span>
+                <span>Server Status: Running on http://localhost:3000</span>
+            </div>
+        </div>
+
+        <div class="api-section">
+            <h2 class="section-title">🔐 Authentication Endpoints</h2>
+            
+            <div class="endpoint">
+                <span class="method post">POST</span>
+                <span class="endpoint-path">/api/auth/register</span>
+                <div class="endpoint-desc">Register a new user account with email, username, and password</div>
+            </div>
+            
+            <div class="endpoint">
+                <span class="method post">POST</span>
+                <span class="endpoint-path">/api/auth/login</span>
+                <div class="endpoint-desc">Login with email and password to receive JWT tokens</div>
+            </div>
+            
+            <div class="endpoint">
+                <span class="method post">POST</span>
+                <span class="endpoint-path">/api/auth/refresh</span>
+                <div class="endpoint-desc">Refresh access token using refresh token</div>
+            </div>
+            
+            <div class="endpoint">
+                <span class="method post">POST</span>
+                <span class="endpoint-path">/api/auth/logout</span>
+                <div class="endpoint-desc">Logout and invalidate refresh token</div>
+            </div>
+        </div>
+
+        <div class="api-section">
+            <h2 class="section-title">💬 Chat Endpoints</h2>
+            
+            <div class="endpoint">
+                <span class="method get">GET</span>
+                <span class="endpoint-path">/api/chat</span>
+                <div class="endpoint-desc">Get user's chat rooms with pagination</div>
+            </div>
+            
+            <div class="endpoint">
+                <span class="method post">POST</span>
+                <span class="endpoint-path">/api/chat</span>
+                <div class="endpoint-desc">Create a new chat room</div>
+            </div>
+            
+            <div class="endpoint">
+                <span class="method get">GET</span>
+                <span class="endpoint-path">/api/chat/:id/messages</span>
+                <div class="endpoint-desc">Get messages from a specific chat room</div>
+            </div>
+            
+            <div class="endpoint">
+                <span class="method post">POST</span>
+                <span class="endpoint-path">/api/chat/:id/ai-chat</span>
+                <div class="endpoint-desc">Send message to AI and get Gemini response</div>
+            </div>
+        </div>
+
+        <div class="api-section">
+            <h2 class="section-title">👤 User Management</h2>
+            
+            <div class="endpoint">
+                <span class="method get">GET</span>
+                <span class="endpoint-path">/api/users/profile</span>
+                <div class="endpoint-desc">Get current user profile and subscription info</div>
+            </div>
+            
+            <div class="endpoint">
+                <span class="method put">PUT</span>
+                <span class="endpoint-path">/api/users/profile</span>
+                <div class="endpoint-desc">Update user profile information</div>
+            </div>
+            
+            <div class="endpoint">
+                <span class="method get">GET</span>
+                <span class="endpoint-path">/api/users/stats</span>
+                <div class="endpoint-desc">Get user statistics and usage data</div>
+            </div>
+        </div>
+
+        <div class="api-section">
+            <h2 class="section-title">💳 Subscription & Payments</h2>
+            
+            <div class="endpoint">
+                <span class="method get">GET</span>
+                <span class="endpoint-path">/api/subscriptions/plans</span>
+                <div class="endpoint-desc">Get available subscription plans</div>
+            </div>
+            
+            <div class="endpoint">
+                <span class="method post">POST</span>
+                <span class="endpoint-path">/api/subscriptions/checkout</span>
+                <div class="endpoint-desc">Create Stripe checkout session</div>
+            </div>
+            
+            <div class="endpoint">
+                <span class="method delete">DELETE</span>
+                <span class="endpoint-path">/api/subscriptions/cancel</span>
+                <div class="endpoint-desc">Cancel current subscription</div>
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h3 class="demo-title">🧪 API Testing Interface</h3>
+            
+            <div class="demo-form">
+                <div class="form-group">
+                    <label>API Endpoint:</label>
+                    <input type="text" id="endpoint" value="/api/auth/register" placeholder="Enter API endpoint">
+                </div>
+                
+                <div class="form-group">
+                    <label>HTTP Method:</label>
+                    <select id="method" style="padding: 12px; border: 1px solid #4a5568; border-radius: 6px; background: #2d3748; color: white;">
+                        <option value="GET">GET</option>
+                        <option value="POST" selected>POST</option>
+                        <option value="PUT">PUT</option>
+                        <option value="DELETE">DELETE</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Request Body (JSON):</label>
+                    <textarea id="requestBody" rows="6" placeholder='{"email": "user@example.com", "username": "testuser", "password": "SecurePass123!"}'></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label>Authorization Token (if required):</label>
+                    <input type="text" id="authToken" placeholder="Bearer token here">
+                </div>
+                
+                <button class="btn btn-primary" onclick="testAPI()">Send Request</button>
+            </div>
+            
+            <div class="response-area" id="responseArea">Response will appear here...</div>
+        </div>
+
+        <div class="api-section">
+            <h2 class="section-title">🚀 Key Features</h2>
+            
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🔐</div>
+                    <h3>Secure Authentication</h3>
+                    <p>JWT-based auth with refresh tokens, bcrypt password hashing, and role-based access control.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">🤖</div>
+                    <h3>AI Integration</h3>
+                    <p>Google Gemini Pro API integration with conversation context and usage tracking.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h3>Real-time Chat</h3>
+                    <p>WebSocket-powered chat rooms with typing indicators and live message updates.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">💳</div>
+                    <h3>Subscription System</h3>
+                    <p>Stripe integration with multiple tiers, usage quotas, and billing management.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">🛡️</div>
+                    <h3>Rate Limiting</h3>
+                    <p>Redis-backed rate limiting with subscription-aware quotas and IP-based restrictions.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3>Admin Panel</h3>
+                    <p>Comprehensive admin dashboard with user management and system analytics.</p>
+                </div>
+            </div>
+            
+            <h3 style="margin-top: 30px; color: #4a5568;">Technology Stack</h3>
+            <div class="tech-stack">
+                <span class="tech-badge">Node.js</span>
+                <span class="tech-badge">TypeScript</span>
+                <span class="tech-badge">Express.js</span>
+                <span class="tech-badge">PostgreSQL</span>
+                <span class="tech-badge">Prisma ORM</span>
+                <span class="tech-badge">Redis</span>
+                <span class="tech-badge">Socket.io</span>
+                <span class="tech-badge">JWT</span>
+                <span class="tech-badge">Stripe</span>
+                <span class="tech-badge">Google Gemini</span>
+                <span class="tech-badge">Docker</span>
+                <span class="tech-badge">Winston</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function testAPI() {
+            const endpoint = document.getElementById('endpoint').value;
+            const method = document.getElementById('method').value;
+            const requestBody = document.getElementById('requestBody').value;
+            const authToken = document.getElementById('authToken').value;
+            const responseArea = document.getElementById('responseArea');
+            
+            responseArea.textContent = 'Sending request...';
+            
+            try {
+                const headers = {
+                    'Content-Type': 'application/json'
+                };
+                
+                if (authToken) {
+                    headers['Authorization'] = `Bearer ${authToken}`;
+                }
+                
+                const options = {
+                    method: method,
+                    headers: headers
+                };
+                
+                if (method !== 'GET' && requestBody) {
+                    options.body = requestBody;
+                }
+                
+                const response = await fetch(`http://localhost:3000${endpoint}`, options);
+                const data = await response.json();
+                
+                responseArea.textContent = JSON.stringify({
+                    status: response.status,
+                    statusText: response.statusText,
+                    data: data
+                }, null, 2);
+                
+            } catch (error) {
+                responseArea.textContent = `Error: ${error.message}\n\nNote: Make sure the server is running on http://localhost:3000`;
+            }
+        }
+        
+        // Set default request body based on endpoint
+        document.getElementById('endpoint').addEventListener('change', function() {
+            const endpoint = this.value;
+            const requestBodyField = document.getElementById('requestBody');
+            
+            if (endpoint.includes('/register')) {
+                requestBodyField.value = JSON.stringify({
+                    email: "user@example.com",
+                    username: "testuser",
+                    password: "SecurePass123!",
+                    firstName: "Test",
+                    lastName: "User"
+                }, null, 2);
+            } else if (endpoint.includes('/login')) {
+                requestBodyField.value = JSON.stringify({
+                    email: "user@example.com",
+                    password: "SecurePass123!"
+                }, null, 2);
+            } else if (endpoint.includes('/ai-chat')) {
+                requestBodyField.value = JSON.stringify({
+                    message: "Hello! Can you help me with a coding question?",
+                    context: []
+                }, null, 2);
+            } else {
+                requestBodyField.value = '';
+            }
+        });
+    </script>
+</body>
+</html>
